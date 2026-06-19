@@ -138,7 +138,7 @@
                 bounds.push(latLng);
                 
                 var marker = L.marker(latLng).addTo(map);
-                marker.bindPopup("<div class='map-popup'><h3>" + loc.name + "</h3><p>" + loc.desc + "</p></div>");
+                marker.bindPopup("<div class='map-popup'><h3>" + loc.name + "</h3></div>");
             });
 
             // Adjust map view to fit all travel locations dynamically

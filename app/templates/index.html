@@ -1,40 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta property="og:title" content="Personal Portfolio">
-    <meta property="og:description" content="My Personal Portfolio">
+    <meta name="description" content="Krishay Garg's Personal Portfolio - UCLA Computer Science student and Production Engineering Fellow.">
+    <meta property="og:title" content="Krishay Garg | Portfolio">
+    <meta property="og:description" content="Personal Portfolio of Krishay Garg, UCLA CS Student and Meta x MLH Production Engineering Fellow.">
     <meta property="og:url" content="{{ url }}">
 
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
-        rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link lang='sass' rel="stylesheet" href="./static/styles/main.css">
-    <link rel='icon' href='./static/img/favicon.ico' type='image/x-icon' />
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+    <link rel="stylesheet" href="./static/styles/main.css">
+    <link rel="icon" href="./static/img/favicon.ico" type="image/x-icon" />
     <title>{{ title }}</title>
 </head>
-
 <body>
+
+    <!-- Dynamic Menu Bar -->
     <header class="nav-bar">
         <div class="nav-content">
-            <a href="/">
+            <a href="/" class="nav-logo-link" id="logo-home">
                 <div class="nav-logo">
-                    <img src="./static/img/logo.svg" />
+                    <img src="./static/img/logo.svg" alt="MLH Logo" />
+                    <span>Portfolio</span>
                 </div>
             </a>
+            <nav class="nav-links">
+                <a href="/" class="nav-link {% if active_page == 'home' %}active{% endif %}" id="nav-home">Home</a>
+                <a href="/hobbies" class="nav-link {% if active_page == 'hobbies' %}active{% endif %}" id="nav-hobbies">Hobbies</a>
+            </nav>
         </div>
     </header>
 
-    <div class="profile">
-        <div id="profile-picture" class="profile-picture">
-            <img src="./static/img/logo.jpg">
-        </div>
-        <h1>{{ title }}</h1>
-    </div>
+    <main class="container">
+        <!-- Hero Section -->
+        <section class="hero-section" id="hero">
+            <div class="hero-card">
+                <div class="profile-picture-container" id="profile-picture">
+                    <img src="{{ profile.profile_pic }}" alt="Krishay Garg Profile Photo">
+                </div>
+                <h1 class="hero-name">{{ profile.name }}</h1>
+                <p class="hero-headline">{{ profile.headline }}</p>
+                <div class="hero-badges">
+                    <span class="badge">UCLA CS</span>
+                    <span class="badge">Meta x MLH</span>
+                    <span class="badge">Software Engineer</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Me Section -->
+        <section class="section-card" id="about">
+            <h2 class="section-title">About Yourself</h2>
+            <p class="about-text">{{ profile.about_me }}</p>
+        </section>
+
+        <!-- Work Experience Section -->
+        <section class="section-card" id="experience">
+            <h2 class="section-title">Work Experience</h2>
+            <div class="timeline">
+                {% for exp in work_experiences %}
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content card-interactive">
+                        <div class="timeline-header">
+                            <h3 class="role-title">{{ exp.role }}</h3>
+                            <span class="timeline-date">{{ exp.dates }}</span>
+                        </div>
+                        <h4 class="company-name">{{ exp.company }}</h4>
+                        <ul class="experience-bullets">
+                            {% for bullet in exp.bullets %}
+                            <li>{{ bullet }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Education Section -->
+        <section class="section-card" id="education">
+            <h2 class="section-title">Education</h2>
+            <div class="education-grid">
+                {% for edu in education %}
+                <div class="education-card card-interactive">
+                    <div class="edu-icon">🎓</div>
+                    <div class="edu-details">
+                        <h3 class="school-name">{{ edu.school }}</h3>
+                        <p class="degree-title">{{ edu.degree }}</p>
+                        <p class="edu-meta">{{ edu.dates }} &bull; <strong class="gpa-text">{{ edu.highlights }}</strong></p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Travel Map Section -->
+        <section class="section-card" id="travels">
+            <h2 class="section-title">Travel Map</h2>
+            <p class="map-subtitle">A map with all the places I've traveled to in the past year:</p>
+            <div id="map-container">
+                <div id="travel-map" style="height: 450px; border-radius: 16px;"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Krishay Garg. Built with Flask and Jinja.</p>
+    </footer>
+
+    <!-- Leaflet Map JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Initialize map
+            var map = L.map('travel-map').setView([20.0, 0.0], 2);
+
+            // Add sleek CartoDB Dark Matter tile layer to match dark glassmorphism styling
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            }).addTo(map);
+
+            // Fetch locations passed from Flask view
+            var locations = {{ locations | tojson }};
+            var bounds = [];
+
+            locations.forEach(function(loc) {
+                var latLng = [loc.lat, loc.lon];
+                bounds.push(latLng);
+                
+                var marker = L.marker(latLng).addTo(map);
+                marker.bindPopup("<div class='map-popup'><h3>" + loc.name + "</h3></div>");
+            });
+
+            // Adjust map view to fit all travel locations dynamically
+            if (bounds.length > 0) {
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
+        });
+    </script>
 </body>
 </html>

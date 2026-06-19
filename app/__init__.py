@@ -17,7 +17,7 @@ portfolio_data = {
             "are translating videos to other languages with lipsync and training an LLM to play chess. "
             "In the past, I've also interned with a stealth startup working in the healthtech field."
         ),
-        "profile_pic": "./static/img/profile_placeholder.png"
+        "profile_pic": "./static/img/profile_picture.png"
     },
     "work_experiences": [
         {

@@ -9,7 +9,7 @@ app = Flask(__name__)
 portfolio_data = {
     "profile": {
         "name": "Krishay Garg",
-        "headline": "Production Engineering Fellow, Meta x MLH",
+        "headline": "Production Engineering Fellow, Meta x MLH | Software Developer",
         "about_me": (
             "My name is Krishay and I am a computer science student at UCLA. "
             "I enjoy working on projects involving software engineering and machine learning, "

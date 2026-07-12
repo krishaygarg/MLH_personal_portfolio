@@ -126,6 +126,17 @@ def hobbies():
     )
 
 
+@app.route('/timeline')
+def timeline():
+    return render_template(
+        'timeline.html',
+        title="Krishay Garg | Timeline",
+        url=os.getenv("URL"),
+        active_page="timeline",
+        **portfolio_data
+    )
+
+
 @app.route('/api/timeline_post', methods=['POST'])
 def post_time_line_post():
     name = request.form.get('name')

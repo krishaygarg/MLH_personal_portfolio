@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Krishay Garg's Personal Portfolio Timeline - Share updates and posts about school and career journey.">
+    <meta property="og:title" content="Krishay Garg | Timeline">
+    <meta property="og:description" content="Check out my education and career journey timeline updates, and post a message!">
+    <meta property="og:url" content="{{ url }}/timeline">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="./static/styles/main.css">
+    <link rel="icon" href="./static/img/favicon.ico" type="image/x-icon" />
+    <title>{{ title }}</title>
+
+    <!-- MD5 Library for Gravatar Hashing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
+</head>
+<body>
+
+    <!-- Dynamic Menu Bar -->
+    <header class="nav-bar">
+        <div class="nav-content">
+            <a href="/" class="nav-logo-link" id="logo-home">
+                <div class="nav-logo">
+                    <img src="./static/img/logo.svg" alt="MLH Logo" />
+                    <span>Portfolio</span>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="/" class="nav-link {% if active_page == 'home' %}active{% endif %}" id="nav-home">Home</a>
+                <a href="/hobbies" class="nav-link {% if active_page == 'hobbies' %}active{% endif %}" id="nav-hobbies">Hobbies</a>
+                <a href="/timeline" class="nav-link {% if active_page == 'timeline' %}active{% endif %}" id="nav-timeline">Timeline</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <!-- Post a New Update Form Card -->
+        <section class="section-card">
+            <h1 class="section-title">Timeline Updates</h1>
+            <p class="section-subtitle">Share your updates or read about my journey here!</p>
+            
+            <form id="timeline-form">
+                <div class="form-group">
+                    <label for="name-input" class="form-label">Name</label>
+                    <input type="text" id="name-input" name="name" class="form-input" placeholder="Your Name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email-input" class="form-label">Email</label>
+                    <input type="email" id="email-input" name="email" class="form-input" placeholder="your.email@example.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="content-input" class="form-label">Content</label>
+                    <textarea id="content-input" name="content" class="form-textarea" placeholder="Write a post about your journey..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn-primary" id="submit-btn">Post Update</button>
+            </form>
+        </section>
+
+        <!-- Timeline Feed Section -->
+        <section class="section-card">
+            <h2 class="section-title">Updates Feed</h2>
+            <div id="timeline-posts" class="timeline-posts-container">
+                <!-- Posts will be dynamically inserted here -->
+                <p style="text-align: center; color: var(--text-muted);">Loading posts...</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Krishay Garg. Built with Flask, Peewee & MySQL.</p>
+    </footer>
+
+    <!-- Frontend logic for fetching and rendering timeline posts -->
+    <script>
+        const form = document.getElementById('timeline-form');
+        const postsContainer = document.getElementById('timeline-posts');
+
+        // Fetch and display timeline posts
+        function fetchPosts() {
+            fetch('/api/timeline_post')
+                .then(response => response.json())
+                .then(data => {
+                    const posts = data.timeline_posts;
+                    if (posts.length === 0) {
+                        postsContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No updates posted yet. Be the first!</p>';
+                        return;
+                    }
+                    
+                    postsContainer.innerHTML = '';
+                    posts.forEach(post => {
+                        // Compute Gravatar URL
+                        const emailHash = md5(post.email.trim().toLowerCase());
+                        const gravatarUrl = `https://www.gravatar.com/avatar/${emailHash}?d=identicon&s=100`;
+                        
+                        // Parse date string
+                        const date = new Date(post.created_at);
+                        const formattedDate = date.toLocaleDateString(undefined, { 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+
+                        const postCard = document.createElement('div');
+                        postCard.className = 'post-card card-interactive';
+                        postCard.innerHTML = `
+                            <div class="avatar-container">
+                                <img src="${gravatarUrl}" alt="${post.name}'s Avatar">
+                            </div>
+                            <div class="post-content-container">
+                                <div class="post-header">
+                                    <span class="post-author">${post.name}</span>
+                                    <span class="post-date">${formattedDate}</span>
+                                </div>
+                                <span class="post-email">${post.email}</span>
+                                <div class="post-body">${post.content}</div>
+                            </div>
+                        `;
+                        postsContainer.appendChild(postCard);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching posts:', error);
+                    postsContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">Failed to load posts. Please try again later.</p>';
+                });
+        }
+
+        // Handle form submission
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.textContent = 'Posting...';
+            submitBtn.disabled = true;
+            
+            const formData = new FormData(form);
+            
+            fetch('/api/timeline_post', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(newPost => {
+                // Reset form fields
+                form.reset();
+                submitBtn.textContent = 'Post Update';
+                submitBtn.disabled = false;
+                
+                // Fetch posts again to show the newly added post
+                fetchPosts();
+            })
+            .catch(error => {
+                console.error('Error posting update:', error);
+                alert('Failed to post update. Please make sure all fields are filled correctly.');
+                submitBtn.textContent = 'Post Update';
+                submitBtn.disabled = false;
+            });
+        });
+
+        // Initialize feed
+        fetchPosts();
+    </script>
+</body>
+</html>

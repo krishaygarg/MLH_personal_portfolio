@@ -1,8 +1,34 @@
 import os
+import datetime
 from flask import Flask, render_template, request
 from dotenv import load_dotenv
+from peewee import *
+from playhouse.shortcuts import model_to_dict
 
 load_dotenv()
+
+mydb = MySQLDatabase(
+    os.getenv("MYSQL_DB"),
+    user=os.getenv("MYSQL_USER"),
+    password=os.getenv("MYSQL_PASSWORD"),
+    host=os.getenv("MYSQL_HOST"),
+    port=3306
+)
+
+print(mydb)
+
+class TimelinePost(Model):
+    name = CharField()
+    email = CharField()
+    content = TextField()
+    created_at = DateTimeField(default=datetime.datetime.now)
+
+    class Meta:
+        database = mydb
+
+mydb.connect()
+mydb.create_tables([TimelinePost])
+
 app = Flask(__name__)
 
 # Data structure to feed Jinja templates dynamically
@@ -98,3 +124,39 @@ def hobbies():
         active_page="hobbies",
         **portfolio_data
     )
+
+
+@app.route('/api/timeline_post', methods=['POST'])
+def post_time_line_post():
+    name = request.form.get('name')
+    email = request.form.get('email')
+    content = request.form.get('content')
+    
+    if not name or not email or not content:
+        return {"error": "Missing name, email, or content"}, 400
+        
+    timeline_post = TimelinePost.create(name=name, email=email, content=content)
+    return model_to_dict(timeline_post)
+
+
+@app.route('/api/timeline_post', methods=['GET'])
+def get_time_line_post():
+    return {
+        'timeline_posts': [
+            model_to_dict(p)
+            for p in TimelinePost.select().order_by(TimelinePost.created_at.desc())
+        ]
+    }
+
+
+@app.route('/api/timeline_post', methods=['DELETE'])
+def delete_time_line_post():
+    id = request.form.get('id') or request.args.get('id')
+    if not id:
+        return {"error": "Missing ID"}, 400
+    try:
+        post = TimelinePost.get_by_id(id)
+        post.delete_instance()
+        return {"message": f"Successfully deleted post {id}"}
+    except TimelinePost.DoesNotExist:
+        return {"error": "Post not found"}, 404

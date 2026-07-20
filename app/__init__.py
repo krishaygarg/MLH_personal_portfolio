@@ -115,7 +115,7 @@ portfolio_data = {
 def index():
     return render_template(
         'index.html',
-        title="Krishay Garg | Portfolio",
+        title="MLH Fellow",
         url=os.getenv("URL"),
         active_page="home",
         **portfolio_data
@@ -147,12 +147,19 @@ def timeline():
 @app.route('/api/timeline_post', methods=['POST'])
 def post_time_line_post():
     name = request.form.get('name')
+    if not name or name.strip() == "":
+        return "Invalid name", 400
+
     email = request.form.get('email')
+    import re
+    email_regex = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+    if not email or not re.match(email_regex, email):
+        return "Invalid email", 400
+
     content = request.form.get('content')
-    
-    if not name or not email or not content:
-        return {"error": "Missing name, email, or content"}, 400
-        
+    if not content or content.strip() == "":
+        return "Invalid content", 400
+
     timeline_post = TimelinePost.create(name=name, email=email, content=content)
     return model_to_dict(timeline_post)
 
